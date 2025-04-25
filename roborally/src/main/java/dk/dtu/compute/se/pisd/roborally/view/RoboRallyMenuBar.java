@@ -21,6 +21,7 @@
  */
 package dk.dtu.compute.se.pisd.roborally.view;
 
+import dk.dtu.compute.se.pisd.roborally.controller.OnlineState;
 import dk.dtu.compute.se.pisd.roborally.gameselection.view.SignInSignUpDialog;
 import dk.dtu.compute.se.pisd.roborally.controller.AppController;
 import javafx.scene.control.Menu;
@@ -63,7 +64,16 @@ public class RoboRallyMenuBar extends MenuBar {
 
         selectGame = new MenuItem("Select Online Game");
         selectGame.setOnAction(e -> {
-            SignInSignUpDialog.display(appController); // Kun vis dialogen
+            if (OnlineState.getInstance().getCurrentUser() != null) {
+                // Hvis brugeren er logget ind, vis spiludvælgelsen
+                this.appController.selectGame();
+            } else {
+                // Hvis ikke logget ind, vis login/sign up dialog
+                SignInSignUpDialog.display(appController);// Vis login dialogen
+                if(OnlineState.getInstance().getCurrentUser() != null) {
+                    this.appController.selectGame();
+                }
+            }
         });
         controlMenu.getItems().add(selectGame);
 

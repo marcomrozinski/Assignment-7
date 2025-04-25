@@ -101,10 +101,12 @@ public class AppController implements Observer {
 
                 OnlineState.getInstance().setCurrentUser(user);
                 showInfo("Signed in as " + user.getName());
+            } else if (response.statusCode() == 401) {
+                // Hvis login fejler (forkert brugernavn eller adgangskode)
+                showError("Incorrect username or password.");
             } else {
                 showError("Sign in failed: " + response.body());
             }
-
         } catch (Exception e) {
             showError("Could not sign in: " + e.getMessage());
         }
