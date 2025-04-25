@@ -63,7 +63,7 @@ public class RoboRallyMenuBar extends MenuBar {
 
         selectGame = new MenuItem("Select Online Game");
         selectGame.setOnAction(e -> {
-            SignInSignUpDialog.display(); // Kun vis dialogen
+            SignInSignUpDialog.display(appController); // Kun vis dialogen
         });
         controlMenu.getItems().add(selectGame);
 

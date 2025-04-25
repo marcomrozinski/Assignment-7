@@ -21,6 +21,7 @@
  */
 package dk.dtu.compute.se.pisd.roborally.controller;
 
+import com.google.gson.GsonBuilder;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Observer;
 import dk.dtu.compute.se.pisd.designpatterns.observer.Subject;
 
@@ -34,6 +35,7 @@ import dk.dtu.compute.se.pisd.roborally.fileaccess.LoadBoard;
 import dk.dtu.compute.se.pisd.roborally.model.Board;
 import dk.dtu.compute.se.pisd.roborally.model.Player;
 
+import dk.dtu.compute.se.pisd.roborally.model.UserAdapter;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -44,6 +46,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import dk.dtu.compute.se.pisd.roborally.model.User;
+import com.google.gson.Gson;
+import dk.dtu.compute.se.pisd.roborally.controller.OnlineState;
+
 
 /**
  * ...
@@ -64,6 +74,77 @@ public class AppController implements Observer {
     public AppController(@NotNull RoboRally roboRally) {
         this.roboRally = roboRally;
     }
+
+
+    public void handleSignIn(String name, String password) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            String json = String.format("{\"name\":\"%s\", \"password\":\"%s\"}", name, password);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/users/signin"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Server response: " + response.body());
+
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(User.class, new UserAdapter())
+                        .create();
+
+                User user = gson.fromJson(response.body(), User.class);
+                System.out.println("Deserialized User: " + user.getName());  // Debugging
+
+
+                OnlineState.getInstance().setCurrentUser(user);
+                showInfo("Signed in as " + user.getName());
+            } else {
+                showError("Sign in failed: " + response.body());
+            }
+
+        } catch (Exception e) {
+            showError("Could not sign in: " + e.getMessage());
+        }
+    }
+    public void handleSignUp(String name, String password) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            String json = String.format("{\"name\":\"%s\", \"password\":\"%s\"}", name, password);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/users/signup"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Server response: " + response.body());
+            if (response.statusCode() == 200) {
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(User.class, new UserAdapter())
+                        .create();
+
+                User user = gson.fromJson(response.body(), User.class);
+                System.out.println("Deserialized User: " + user.getName());  // Debugging
+
+
+                OnlineState.getInstance().setCurrentUser(user);
+                showInfo("Signed up as " + user.getName());
+            } else if (response.statusCode() == 409) {
+                showError("Username already exists. Please choose another.");
+            } else {
+                showError("Sign up failed: " + response.body());
+            }
+
+
+        } catch (Exception e) {
+            showError("Could not sign up: " + e.getMessage());
+        }
+    }
+
 
     public void newGame() {
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(PLAYER_NUMBER_OPTIONS.get(0), PLAYER_NUMBER_OPTIONS);
@@ -167,6 +248,22 @@ public class AppController implements Observer {
         if (gameController == null || stopGame()) {
             Platform.exit();
         }
+    }
+
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public boolean isGameRunning() {
