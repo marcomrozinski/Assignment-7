@@ -75,6 +75,36 @@ public class AppController implements Observer {
         this.roboRally = roboRally;
     }
 
+    public void createNewGame(String gameName, int minPlayers, int maxPlayers) {
+        try {
+            // Opret et nyt spil objekt
+            Game newGame = new Game(gameName, minPlayers, maxPlayers);
+
+            // Send spillet til serveren for oprettelse (hvis relevant)
+            HttpClient client = HttpClient.newHttpClient();
+            String json = String.format("{\"name\":\"%s\", \"minPlayers\":%d, \"maxPlayers\":%d}",
+                    gameName, minPlayers, maxPlayers);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/games"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // Hvis spillet blev oprettet succesfuldt
+                showInfo("Game " + gameName + " created successfully!");
+            } else {
+                // Håndter fejlsituationer, hvis spillet ikke blev oprettet
+                showError("Failed to create game: " + response.body());
+            }
+        } catch (Exception e) {
+            showError("Could not create game: " + e.getMessage());
+        }
+    }
+
 
     public void handleSignIn(String name, String password) {
         try {

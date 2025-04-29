@@ -22,8 +22,21 @@ public class GameSelection extends BorderPane {
         close.setMinWidth(50);
         close.setMinHeight(30);
 
+        Button create = new Button("Create Game");
+        create.setMinWidth(50);
+        create.setMinHeight(30);
+        create.setOnAction(e -> {
+            // Dette kan være et input til at få navnet på spillet og antal spillere fra brugeren
+            String gameName = "New Game"; // Du kan erstatte dette med et inputfelt for brugeren
+            int minPlayers = 1; // Minimum antal spillere (du kan erstatte dette med brugerinput)
+            int maxPlayers = 10; // Maksimum antal spillere (kan også være brugerinput)
+
+            // Kalder AppController's metode for at oprette spil
+            appController.createNewGame(gameName, minPlayers, maxPlayers);
+        });
 // Læg knappen i en VBox eller HBox alene
         VBox closeBox = new VBox(close);
+        VBox createBox  = new VBox(create);
 
 // Nu laver vi label
         Label title = new Label("Online Games:");
@@ -35,7 +48,7 @@ public class GameSelection extends BorderPane {
 // Læg det hele i én VBox
         VBox vbox = new VBox();
         vbox.setSpacing(10);
-        vbox.getChildren().addAll(closeBox, title, bottom);
+        vbox.getChildren().addAll(closeBox, createBox, title, bottom);
 
 // Sæt VBox i midten
         this.setCenter(vbox);
