@@ -26,7 +26,6 @@ public class GamesView extends GridPane {
     private AppController appController;
     private List<GameButtons> games;
 
-
     public GamesView(AppController appController, GameSelection gameSelection) {
         this.appController = appController;
         games = new ArrayList<>();
@@ -34,6 +33,10 @@ public class GamesView extends GridPane {
         this.getColumnConstraints().add(new ColumnConstraints(200));
         this.getColumnConstraints().add(new ColumnConstraints(70));
         this.getColumnConstraints().add(new ColumnConstraints(70));
+        this.getColumnConstraints().add(new ColumnConstraints(70));
+        this.getColumnConstraints().add(new ColumnConstraints(70));
+
+
         /*
         this.prefWidth(width);
         this.maxWidth(width);
@@ -67,8 +70,9 @@ public class GamesView extends GridPane {
                         " (min: " + game.getMinPlayers() +
                         ", max: " + game.getMaxPlayers() + ")" );
 
+                Button joinButton = new Button("Join");
+                Button leaveButton = new Button("Leave");
                 Button startButton = new Button("Start");
-
                 Button deleteButton = new Button("Delete");
                 deleteButton.setOnAction((e) -> {
                     try {
@@ -81,8 +85,10 @@ public class GamesView extends GridPane {
                     }
                 });
                 this.add(nameButton, 0, i);
-                this.add(startButton, 1, i);
-                this.add(deleteButton, 2, i);
+                this.add(joinButton, 1,i);
+                this.add(leaveButton, 2,i);
+                this.add(startButton, 3, i);
+                this.add(deleteButton, 4, i);
                 i++;
             }
         } catch (Exception e) {
@@ -103,11 +109,17 @@ public class GamesView extends GridPane {
 
         public final Button deleteButton;
 
-        public GameButtons(Game game, Button nameButton, Button startButton, Button deleteButton) {
+        public final Button joinButton;
+
+        public final Button leaveButton;
+
+        public GameButtons(Game game, Button nameButton, Button joinButton, Button leaveButton, Button startButton, Button deleteButton) {
             this.game = game;
             this.nameButton = nameButton;
             this.startButton = startButton;
             this.deleteButton = deleteButton;
+            this.joinButton = joinButton;
+            this.leaveButton = leaveButton;
         }
 
     }
