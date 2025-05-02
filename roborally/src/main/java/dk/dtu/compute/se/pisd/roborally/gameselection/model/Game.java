@@ -92,5 +92,14 @@ public class Game {
         //            since this will invoke a REST request!
         return "Game{ id=" + getId() + " }";
     }
+    private User owner;
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
 
 }

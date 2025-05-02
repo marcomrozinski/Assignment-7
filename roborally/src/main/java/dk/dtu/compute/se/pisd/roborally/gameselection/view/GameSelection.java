@@ -26,13 +26,8 @@ public class GameSelection extends BorderPane {
         create.setMinWidth(50);
         create.setMinHeight(30);
         create.setOnAction(e -> {
-            // Dette kan være et input til at få navnet på spillet og antal spillere fra brugeren
-            String gameName = "New Game"; // Du kan erstatte dette med et inputfelt for brugeren
-            int minPlayers = 1; // Minimum antal spillere (du kan erstatte dette med brugerinput)
-            int maxPlayers = 10; // Maksimum antal spillere (kan også være brugerinput)
-
-            // Kalder AppController's metode for at oprette spil
-            appController.createNewGame(gameName, minPlayers, maxPlayers);
+            GamesView gamesView = new GamesView(appController, this);
+            gamesView.openCreateGameDialog(); // Åbn dialogen du lavede før
         });
 // Læg knappen i en VBox eller HBox alene
         VBox closeBox = new VBox(close);
@@ -52,12 +47,5 @@ public class GameSelection extends BorderPane {
 
 // Sæt VBox i midten
         this.setCenter(vbox);
-
-
-
     }
-
-
-
-
 }

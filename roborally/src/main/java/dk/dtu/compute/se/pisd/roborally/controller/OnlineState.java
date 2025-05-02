@@ -19,4 +19,6 @@ public class OnlineState {
     public void setCurrentUser(User user) {
         this.currentUser = user;
     }
+
 }
+
