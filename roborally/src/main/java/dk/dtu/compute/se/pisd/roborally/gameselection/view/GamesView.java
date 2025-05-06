@@ -70,7 +70,7 @@ public class GamesView extends GridPane {
                 deleteButton.setOnAction((e) -> {
                     try {
                         clientGame.delete(game.getId());
-                        appController.selectGame();
+                        update();
                     } catch (Exception exception) {
                         exception.printStackTrace();
                     }

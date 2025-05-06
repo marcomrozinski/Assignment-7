@@ -25,8 +25,8 @@ public class GameSelection extends BorderPane {
         Button create = new Button("Create Game");
         create.setMinWidth(50);
         create.setMinHeight(30);
+        GamesView gamesView = new GamesView(appController, this);
         create.setOnAction(e -> {
-            GamesView gamesView = new GamesView(appController, this);
             gamesView.openCreateGameDialog(); // Åbn dialogen du lavede før
         });
 // Læg knappen i en VBox eller HBox alene
@@ -37,8 +37,7 @@ public class GameSelection extends BorderPane {
         Label title = new Label("Online Games:");
         title.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
 
-// Spil-listen
-        Pane bottom = new GamesView(appController, this);
+    Pane bottom = gamesView;
 
 // Læg det hele i én VBox
         VBox vbox = new VBox();
