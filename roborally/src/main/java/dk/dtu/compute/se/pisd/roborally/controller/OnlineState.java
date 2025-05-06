@@ -20,5 +20,5 @@ public class OnlineState {
         this.currentUser = user;
     }
 
-}
+    }
 

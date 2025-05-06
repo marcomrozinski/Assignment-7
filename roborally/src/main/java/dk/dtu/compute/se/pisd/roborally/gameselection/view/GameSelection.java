@@ -25,10 +25,21 @@ public class GameSelection extends BorderPane {
         Button create = new Button("Create Game");
         create.setMinWidth(50);
         create.setMinHeight(30);
+
         GamesView gamesView = new GamesView(appController, this);
         create.setOnAction(e -> {
             gamesView.openCreateGameDialog(); // Åbn dialogen du lavede før
         });
+
+        Button signOutButton = new Button("Sign Out");
+        signOutButton.setOnAction(e -> {
+            OnlineState.getInstance().setCurrentUser(null);
+
+            gamesView.update();
+
+            create.setDisable(true); // Deaktiver knappen
+        });
+
 // Læg knappen i en VBox eller HBox alene
         VBox closeBox = new VBox(close);
         VBox createBox  = new VBox(create);
@@ -42,7 +53,7 @@ public class GameSelection extends BorderPane {
 // Læg det hele i én VBox
         VBox vbox = new VBox();
         vbox.setSpacing(10);
-        vbox.getChildren().addAll(closeBox, createBox, title, bottom);
+        vbox.getChildren().addAll(closeBox, createBox,signOutButton, title, bottom);
 
 // Sæt VBox i midten
         this.setCenter(vbox);

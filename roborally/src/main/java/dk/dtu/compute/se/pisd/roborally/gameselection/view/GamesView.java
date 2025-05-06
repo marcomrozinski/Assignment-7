@@ -1,8 +1,9 @@
 package dk.dtu.compute.se.pisd.roborally.gameselection.view;
 
 import dk.dtu.compute.se.pisd.roborally.controller.AppController;
+import dk.dtu.compute.se.pisd.roborally.controller.OnlineState;
 import dk.dtu.compute.se.pisd.roborally.gameselection.model.Game;
-import dk.dtu.compute.se.pisd.roborally.gameselection.model.User;
+import dk.dtu.compute.se.pisd.roborally.model.User;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -43,8 +44,16 @@ public class GamesView extends GridPane {
         update();
     }
 
-    private void update() {
-        this.getChildren().clear(); // ryd visning før opdatering
+    void update() {
+        System.out.println("Update called");
+        this.getChildren().clear();
+        User user = OnlineState.getInstance().getCurrentUser();
+        if (user == null) {
+            Label info = new Label("You are not logged in");
+            this.add(info, 0, 1);
+            return;
+        }
+
         try {
             URI baseURI = new URI("http://localhost:8080/");
 
@@ -116,7 +125,6 @@ public class GamesView extends GridPane {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            // Her skal den refreshe og kalde den update ovenover
         });
 
         layout.getChildren().addAll(
