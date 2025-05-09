@@ -87,7 +87,11 @@ public class GamesView extends GridPane {
 
                 this.add(gameBox, 0, i);
 
+                boolean alreadyJoined = game.getPlayers().stream()
+                        .anyMatch(p -> p.getUser() != null && p.getUser().getUid() == user.getUid());
+
                 Button joinButton = new Button("Join");
+                joinButton.setDisable(alreadyJoined); // Disable knappen hvis brugeren er med
 
                 joinButton.setOnAction(e -> {
                     try {
@@ -119,6 +123,41 @@ public class GamesView extends GridPane {
                 });
 
                 Button leaveButton = new Button("Leave");
+                leaveButton.setOnAction(e -> {
+                    try {
+                        User currentUser = OnlineState.getInstance().getCurrentUser();
+                        if (currentUser == null) {
+                            System.out.println("User not logged in.");
+                            return;
+                        }
+
+                        // Find Player-objekt for currentUser i dette spil
+                        Player playerToRemove = game.getPlayers().stream()
+                                .filter(p -> p.getName() != null && p.getName().equals(currentUser.getName()))
+                                .findFirst()
+                                .orElse(null);
+
+
+                        if (playerToRemove == null) {
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, "You have not joined this game.");
+                            alert.showAndWait();
+                            return;
+                        }
+
+                        Client<Player> playerClient = factory.create(Player.class);
+
+                        playerClient.delete(playerToRemove.getId());
+                        System.out.println("Left game: " + game.getName());
+
+                        update(); // Refresh GUI
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Could not leave game: " + ex.getMessage());
+                        alert.showAndWait();
+                    }
+                });
+
 
                 leaveButton.setDisable(true);  // Disable leave by default
 
