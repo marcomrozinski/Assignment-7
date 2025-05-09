@@ -93,6 +93,12 @@ public class GamesView extends GridPane {
                 Button joinButton = new Button("Join");
                 joinButton.setDisable(alreadyJoined); // Disable knappen hvis brugeren er med
 
+                if (game.getPlayers().size() == game.getMaxPlayers()) {
+                    joinButton.setDisable(true); // Disable start button if there are not enough players
+                } else {
+                    joinButton.setDisable(false); // Enable start button if the game is full enough
+                }
+
                 joinButton.setOnAction(e -> {
                     try {
                         User currentUser = OnlineState.getInstance().getCurrentUser();
@@ -123,6 +129,8 @@ public class GamesView extends GridPane {
                 });
 
                 Button leaveButton = new Button("Leave");
+
+
                 leaveButton.setOnAction(e -> {
                     try {
                         User currentUser = OnlineState.getInstance().getCurrentUser();
