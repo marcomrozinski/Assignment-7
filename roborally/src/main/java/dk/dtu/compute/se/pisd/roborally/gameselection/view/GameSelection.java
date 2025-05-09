@@ -1,6 +1,7 @@
 package dk.dtu.compute.se.pisd.roborally.gameselection.view;
 
 import dk.dtu.compute.se.pisd.roborally.controller.AppController;
+import dk.dtu.compute.se.pisd.roborally.controller.OnlineState;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;

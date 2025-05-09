@@ -3,6 +3,7 @@ package dk.dtu.compute.se.pisd.roborally.gameselection.view;
 import dk.dtu.compute.se.pisd.roborally.controller.AppController;
 import dk.dtu.compute.se.pisd.roborally.controller.OnlineState;
 import dk.dtu.compute.se.pisd.roborally.gameselection.model.Game;
+import dk.dtu.compute.se.pisd.roborally.gameselection.model.Player;
 import dk.dtu.compute.se.pisd.roborally.model.User;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -67,25 +68,93 @@ public class GamesView extends GridPane {
 
             int i = 1;
             for (Game game : games) {
-                Button nameButton = new Button(game.getName() +
+                VBox gameBox = new VBox();
+                gameBox.setSpacing(5);
+
+                Label gameLabel = new Label(game.getName() +
                         " (min: " + game.getMinPlayers() +
                         ", max: " + game.getMaxPlayers() + ")");
+                gameBox.getChildren().add(gameLabel);
+
+                if (game.getPlayers() != null && !game.getPlayers().isEmpty()) {
+                    for (Player player : game.getPlayers()) {
+                        String playerText = "- " + player.getName();
+                        gameBox.getChildren().add(new Label(playerText));
+                    }
+                } else {
+                    gameBox.getChildren().add(new Label("No players yet."));
+                }
+
+                this.add(gameBox, 0, i);
 
                 Button joinButton = new Button("Join");
+                joinButton.setOnAction(e -> {
+                    try {
+                        User currentUser = OnlineState.getInstance().getCurrentUser();
+                        if (currentUser == null) {
+                            System.out.println("User not logged in.");
+                            return;
+                        }
+
+                        Player newPlayer = new Player();
+                        newPlayer.setName(currentUser.getName());
+
+                        Game gameRef = new Game();
+                        gameRef.setUid(game.getUid());
+                        gameRef.setId(URI.create("http://localhost:8080/games/" + game.getUid()));
+                        newPlayer.setGame(gameRef);
+
+                        Client<Player> playerClient = factory.create(Player.class);
+                        playerClient.post(newPlayer);
+
+                        System.out.println("Joined game!");
+                        update();
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Could not join game: " + ex.getMessage());
+                        alert.showAndWait();
+                    }
+                });
+
                 Button leaveButton = new Button("Leave");
                 Button startButton = new Button("Start");
                 Button deleteButton = new Button("Delete");
 
-                deleteButton.setOnAction((e) -> {
+                deleteButton.setOnAction(e -> {
                     try {
-                        clientGame.delete(game.getId());
-                        update();
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
+                        User currentUser = OnlineState.getInstance().getCurrentUser();
+                        if (currentUser == null) {
+                            System.out.println("User not logged in.");
+                            return;
+                        }
+
+                        if (game.getOwner() != null && game.getOwner().getUid() != currentUser.getUid()) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Only the owner can delete this game.");
+                            alert.showAndWait();
+                            return;
+                        }
+
+                        URI gameId = game.getId();
+                        if (gameId != null) {
+                            System.out.println("Deleting game: " + gameId);
+                            clientGame.delete(gameId);
+                            update();
+                        } else {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Game ID is missing.");
+                            alert.showAndWait();
+                        }
+
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        Alert alert = new Alert(Alert.AlertType.ERROR, "Error deleting game: " + ex.getMessage());
+                        alert.showAndWait();
                     }
                 });
 
-                this.add(nameButton, 0, i);
+
+
+
                 this.add(joinButton, 1, i);
                 this.add(leaveButton, 2, i);
                 this.add(startButton, 3, i);
@@ -112,18 +181,39 @@ public class GamesView extends GridPane {
 
         createButton.setOnAction(e -> {
             try {
+                User currentUser = OnlineState.getInstance().getCurrentUser();
+                if (currentUser == null) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "You must be logged in to create a game.");
+                    alert.showAndWait();
+                    return;
+                }
+
+                // Opret spil
                 Game game = new Game();
                 game.setName(nameField.getText());
                 game.setMinPlayers(Integer.parseInt(minField.getText()));
                 game.setMaxPlayers(Integer.parseInt(maxField.getText()));
+
+                // Sæt owner
+                dk.dtu.compute.se.pisd.roborally.gameselection.model.User userRef =
+                        new dk.dtu.compute.se.pisd.roborally.gameselection.model.User();
+                userRef.setUid(currentUser.getUid());
+                userRef.setId(URI.create("http://localhost:8080/users/" + currentUser.getUid()));
+                game.setOwner(userRef);
+
+                // Send til backend
                 URI baseURI = new URI("http://localhost:8080/");
                 ClientFactory factory = Configuration.builder().setBaseUri(baseURI).build().buildClientFactory();
                 Client<Game> clientGame = factory.create(Game.class);
                 clientGame.post(game);
+
                 update();
                 dialog.close();
+
             } catch (Exception ex) {
                 ex.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to create game: " + ex.getMessage());
+                alert.showAndWait();
             }
         });
 

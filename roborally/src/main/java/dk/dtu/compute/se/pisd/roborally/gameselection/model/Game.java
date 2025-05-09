@@ -94,6 +94,8 @@ public class Game {
     }
     private User owner;
 
+
+    @LinkedResource
     public User getOwner() {
         return owner;
     }
