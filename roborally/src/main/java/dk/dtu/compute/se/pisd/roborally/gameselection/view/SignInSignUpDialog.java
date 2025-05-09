@@ -1,15 +1,26 @@
 package dk.dtu.compute.se.pisd.roborally.gameselection.view;
 
-
-
 import dk.dtu.compute.se.pisd.roborally.controller.AppController;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+/**
+ * A modal dialog that allows the user to either sign in with existing credentials
+ * or sign up for a new account.
+ * <p>
+ * Presents two initial buttons ("Sign In" / "Sign Up"), then dynamically switches
+ * to the appropriate input form based on the user's choice.
+ * </p>
+ */
 public class SignInSignUpDialog {
 
+    /**
+     * Displays the sign-in / sign-up dialog and waits for it to be closed.
+     *
+     * @param appController the controller used to perform sign-in or sign-up actions
+     */
     public static void display(AppController appController) {
         Stage dialog = new Stage();
         dialog.setTitle("Sign In or Sign Up");
@@ -22,10 +33,10 @@ public class SignInSignUpDialog {
         Button signInButton = new Button("Sign In");
         Button signUpButton = new Button("Sign Up");
 
-        // Startvisning – kun to knapper
+        // Initial view: two buttons
         dialogVBox.getChildren().addAll(label, new HBox(10, signInButton, signUpButton));
 
-        // Handling for Sign In
+        // Sign In form
         signInButton.setOnAction(e -> {
             dialogVBox.getChildren().clear();
 
@@ -48,7 +59,7 @@ public class SignInSignUpDialog {
             dialogVBox.getChildren().addAll(inputLabel, usernameField, passwordField, confirmButton);
         });
 
-        // Handling for Sign Up
+        // Sign Up form
         signUpButton.setOnAction(e -> {
             dialogVBox.getChildren().clear();
 
@@ -64,7 +75,6 @@ public class SignInSignUpDialog {
             confirmPasswordField.setPromptText("Confirm Password");
 
             Button confirmButton = new Button("Confirm Sign Up");
-
             confirmButton.setOnAction(event -> {
                 String username = usernameField.getText();
                 String password = passwordField.getText();
@@ -89,11 +99,16 @@ public class SignInSignUpDialog {
             );
         });
 
-
         Scene scene = new Scene(dialogVBox, 300, 200);
         dialog.setScene(scene);
         dialog.showAndWait();
     }
+
+    /**
+     * Displays an error alert with the specified message.
+     *
+     * @param message the error message to show in the alert
+     */
     private static void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
@@ -101,6 +116,4 @@ public class SignInSignUpDialog {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
-
 }
