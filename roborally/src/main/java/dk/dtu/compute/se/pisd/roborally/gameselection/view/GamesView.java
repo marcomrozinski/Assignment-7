@@ -66,6 +66,15 @@ public class GamesView extends GridPane {
             Client<Game> clientGame = factory.create(Game.class);
             Iterable<Game> games = clientGame.getAll();
 
+            boolean userInAnyGame = false;
+            for (Game g : games) {
+                if (g.getPlayers().stream()
+                        .anyMatch(p -> p.getUser() != null && p.getUser().getUid() == user.getUid())) {
+                    userInAnyGame = true;
+                    break;
+                }
+            }
+
             int i = 1;
             for (Game game : games) {
                 VBox gameBox = new VBox();
@@ -87,46 +96,45 @@ public class GamesView extends GridPane {
 
                 this.add(gameBox, 0, i);
 
-                boolean alreadyJoined = game.getPlayers().stream()
-                        .anyMatch(p -> p.getUser() != null && p.getUser().getUid() == user.getUid());
 
                 Button joinButton = new Button("Join");
-                joinButton.setDisable(alreadyJoined); // Disable knappen hvis brugeren er med
 
-                if (game.getPlayers().size() == game.getMaxPlayers()) {
-                    joinButton.setDisable(true); // Disable start button if there are not enough players
-                } else {
-                    joinButton.setDisable(false); // Enable start button if the game is full enough
-                }
+                boolean alreadyJoinedThis = game.getPlayers().stream()
+                        .anyMatch(p -> p.getName().equals(user.getName()));
+
+                joinButton.setDisable(
+                        userInAnyGame ||
+                                alreadyJoinedThis ||
+                                game.getPlayers().size() == game.getMaxPlayers()
+                );
 
                 joinButton.setOnAction(e -> {
                     try {
                         User currentUser = OnlineState.getInstance().getCurrentUser();
-                        if (currentUser == null) {
-                            System.out.println("User not logged in.");
-                            return;
-                        }
+                        if (currentUser == null) return;
 
                         Player newPlayer = new Player();
                         newPlayer.setName(currentUser.getName());
 
+                        // <-- her sætter du User-feltet på Player
+                        dk.dtu.compute.se.pisd.roborally.gameselection.model.User userRef =
+                                new dk.dtu.compute.se.pisd.roborally.gameselection.model.User();
+                        userRef.setUid(currentUser.getUid());
+                        userRef.setId(URI.create(baseURI + "users/" + currentUser.getUid()));
+                        newPlayer.setUser(userRef);
+
                         Game gameRef = new Game();
                         gameRef.setUid(game.getUid());
-                        gameRef.setId(URI.create("http://localhost:8080/games/" + game.getUid()));
+                        gameRef.setId(URI.create(baseURI + "games/" + game.getUid()));
                         newPlayer.setGame(gameRef);
 
                         Client<Player> playerClient = factory.create(Player.class);
                         playerClient.post(newPlayer);
 
-                        System.out.println("Joined game!");
                         update();
-
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        Alert alert = new Alert(Alert.AlertType.ERROR, "Could not join game: " + ex.getMessage());
-                        alert.showAndWait();
-                    }
+                    } catch (Exception ex) { }
                 });
+
 
                 Button leaveButton = new Button("Leave");
 
