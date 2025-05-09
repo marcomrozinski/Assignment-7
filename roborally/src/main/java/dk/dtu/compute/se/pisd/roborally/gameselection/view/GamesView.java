@@ -88,6 +88,7 @@ public class GamesView extends GridPane {
                 this.add(gameBox, 0, i);
 
                 Button joinButton = new Button("Join");
+
                 joinButton.setOnAction(e -> {
                     try {
                         User currentUser = OnlineState.getInstance().getCurrentUser();
@@ -118,6 +119,16 @@ public class GamesView extends GridPane {
                 });
 
                 Button leaveButton = new Button("Leave");
+
+                leaveButton.setDisable(true);  // Disable leave by default
+
+                // Enable the leave button if the user is already in the game
+                for (Player player : game.getPlayers()) {
+                    if (player.getName().equals(user.getName())) {
+                        leaveButton.setDisable(false);  // Enable leave button if the user is in the game
+                        break;
+                    }
+                }
                 Button startButton = new Button("Start");
 
                 if (game.getPlayers().size() < game.getMinPlayers()) {
