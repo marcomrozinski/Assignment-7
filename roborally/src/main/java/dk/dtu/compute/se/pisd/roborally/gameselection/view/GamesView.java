@@ -119,6 +119,13 @@ public class GamesView extends GridPane {
 
                 Button leaveButton = new Button("Leave");
                 Button startButton = new Button("Start");
+
+                if (game.getPlayers().size() < game.getMinPlayers()) {
+                    startButton.setDisable(true); // Disable start button if there are not enough players
+                } else {
+                    startButton.setDisable(false); // Enable start button if the game is full enough
+                }
+
                 Button deleteButton = new Button("Delete");
 
                 deleteButton.setOnAction(e -> {
