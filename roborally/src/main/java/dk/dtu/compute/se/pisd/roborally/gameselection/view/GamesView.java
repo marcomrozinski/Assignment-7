@@ -66,14 +66,14 @@ public class GamesView extends GridPane {
             Client<Game> clientGame = factory.create(Game.class);
             Iterable<Game> games = clientGame.getAll();
 
-            boolean userInAnyGame = false;
-            for (Game g : games) {
-                if (g.getPlayers().stream()
-                        .anyMatch(p -> p.getUser() != null && p.getUser().getUid() == user.getUid())) {
-                    userInAnyGame = true;
-                    break;
-                }
-            }
+            // Fetch all games
+            List<Game> allGames = new ArrayList<>();
+            clientGame.getAll().forEach(allGames::add);
+
+            // Check if user is already in any game by player name
+            boolean userInAnyGame = allGames.stream()
+                    .anyMatch(g -> g.getPlayers().stream()
+                            .anyMatch(p -> p.getName() != null && p.getName().equals(user.getName())));
 
             int i = 1;
             for (Game game : games) {
